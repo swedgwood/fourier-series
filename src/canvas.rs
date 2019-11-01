@@ -1,9 +1,8 @@
 extern crate sdl2;
 
-use sdl2::pixels::Color;
 use sdl2::event::EventPollIterator;
-use std::time::Duration;
 
+pub use sdl2::pixels::Color;
 pub use sdl2::event::Event;
 pub use sdl2::keyboard::Keycode;
 
@@ -12,6 +11,10 @@ pub struct Canvas {
     video_subsystem: sdl2::VideoSubsystem,
     canvas: sdl2::render::WindowCanvas,
     event_pump: sdl2::EventPump,
+    primary_color: Color,
+    secondary_color: Color,
+    background: Color,
+
 }
 
 impl Canvas {
@@ -24,14 +27,23 @@ impl Canvas {
             .build()
             .unwrap();
 
-        let mut canvas = window.into_canvas().build().unwrap();
+        let canvas = window.into_canvas().build().unwrap();
         let event_pump = sdl_context.event_pump().unwrap();
 
-        Self { sdl_context, video_subsystem, canvas, event_pump }
+        Self { 
+            sdl_context, video_subsystem, canvas, event_pump,
+            primary_color: Color::RGB(255, 255, 255),
+            secondary_color: Color::RGB(0, 0, 255),
+            background: Color::RGB(0, 0, 0),
+        }
     }
-
 
     pub fn poll_events_iter(&mut self) -> EventPollIterator {
         self.event_pump.poll_iter()
     }
+
+    pub fn present(&mut self) {
+        self.canvas.present();
+    }
+
 }
