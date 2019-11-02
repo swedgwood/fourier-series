@@ -1,6 +1,6 @@
-use std::ops;
+use std::{cmp, ops};
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct Point {
     x: f64, y: f64,
 }
@@ -22,5 +22,11 @@ impl ops::Add<Point> for Point {
 impl ops::AddAssign for Point {
     fn add_assign(&mut self, rhs: Self) {
         *self = Self::new(self.x + rhs.x, self.y + rhs.y);
+    }
+}
+
+impl cmp::PartialEq for Point {
+    fn eq(&self, rhs: &Self) -> bool {
+        self.x == rhs.x && self.y == rhs.y
     }
 }
