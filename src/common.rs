@@ -25,6 +25,28 @@ impl ops::AddAssign for Point {
     }
 }
 
+impl ops::Sub<Point> for Point {
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self {
+        Self::new(self.x - rhs.x, self.y - rhs.y)
+    }
+}
+
+impl ops::SubAssign for Point {
+    fn sub_assign(&mut self, rhs: Self) {
+        *self = Self::new(self.x - rhs.x, self.y - rhs.y);
+    }
+}
+
+impl ops::Neg for Point {
+    type Output = Self;
+
+    fn neg(self) -> Self {
+        Self::new(-self.x, -self.y)
+    }
+}
+
 impl cmp::PartialEq for Point {
     fn eq(&self, rhs: &Self) -> bool {
         self.x == rhs.x && self.y == rhs.y
