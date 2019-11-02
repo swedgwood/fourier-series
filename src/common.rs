@@ -9,6 +9,10 @@ impl Point {
     pub fn new(x: f64, y: f64) -> Self {
         Self { x, y }
     }
+
+    pub fn mag(&self) -> f64 {
+        (self.x.powf(2.0) + self.y.powf(2.0)).sqrt()
+    }
 }
 
 impl ops::Add<Point> for Point {
