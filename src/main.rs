@@ -1,13 +1,9 @@
-use std::time::Duration;
-
-mod canvas;
-use canvas::{Canvas, Color, Event, Keycode};
-
-const primary_color: Color = Color {r:255, g:255, b:255, a:255};
-const secondary_color: Color = Color {r:0, g:0, b:255, a:255};
-const background: Color = Color {r:0, g:0, b:0, a:255};
+use fourier_series::FourierSeries;
 
 fn main() {
+    let mut fs = FourierSeries::new();
+
+    /*
     let mut canvas = Canvas::new();
 
     let mut running = true;
@@ -23,5 +19,5 @@ fn main() {
 
         canvas.present();
         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
-    };
+    };*/
 }

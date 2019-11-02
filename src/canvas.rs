@@ -11,10 +11,6 @@ pub struct Canvas {
     video_subsystem: sdl2::VideoSubsystem,
     canvas: sdl2::render::WindowCanvas,
     event_pump: sdl2::EventPump,
-    primary_color: Color,
-    secondary_color: Color,
-    background: Color,
-
 }
 
 impl Canvas {
@@ -32,9 +28,6 @@ impl Canvas {
 
         Self { 
             sdl_context, video_subsystem, canvas, event_pump,
-            primary_color: Color::RGB(255, 255, 255),
-            secondary_color: Color::RGB(0, 0, 255),
-            background: Color::RGB(0, 0, 0),
         }
     }
 
