@@ -26,13 +26,8 @@ pub struct World {
 }
 
 impl World {
-    pub fn new() -> Self {
-        Self {
-            svectors: vec![
-                SVector::new(0.0, 1.0, 1.0),
-                SVector::new(0.0, 2.0, 1.0)
-            ]
-        }
+    pub fn new(svectors: Vec<SVector>) -> Self {
+        Self { svectors }
     }
 
     pub fn get_state(&self, t: f64) -> Vec<Point> {
