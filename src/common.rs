@@ -15,30 +15,40 @@ impl Point {
     }
 }
 
-impl ops::Add<Point> for Point {
+impl<T1: Into<f64>, T2: Into<f64>> From<(T1, T2)> for Point {
+    fn from(value: (T1, T2)) -> Self {
+        Self::new(value.0.into(), value.1.into())
+    }
+}
+
+impl<T: Into<Point>> ops::Add<T> for Point {
     type Output = Self;
 
-    fn add(self, rhs: Self) -> Self {
+    fn add(self, rhs: T) -> Self {
+        let rhs = rhs.into();
         Self::new(self.x + rhs.x, self.y + rhs.y)
     }
 }
 
-impl ops::AddAssign for Point {
-    fn add_assign(&mut self, rhs: Self) {
+impl<T: Into<Point>> ops::AddAssign<T> for Point {
+    fn add_assign(&mut self, rhs: T) {
+        let rhs = rhs.into();
         *self = Self::new(self.x + rhs.x, self.y + rhs.y);
     }
 }
 
-impl ops::Sub<Point> for Point {
+impl<T: Into<Point>> ops::Sub<T> for Point {
     type Output = Self;
 
-    fn sub(self, rhs: Self) -> Self {
+    fn sub(self, rhs: T) -> Self {
+        let rhs = rhs.into();
         Self::new(self.x - rhs.x, self.y - rhs.y)
     }
 }
 
-impl ops::SubAssign for Point {
-    fn sub_assign(&mut self, rhs: Self) {
+impl<T: Into<Point>> ops::SubAssign<T> for Point {
+    fn sub_assign(&mut self, rhs: T) {
+        let rhs = rhs.into();
         *self = Self::new(self.x - rhs.x, self.y - rhs.y);
     }
 }
@@ -51,8 +61,9 @@ impl ops::Neg for Point {
     }
 }
 
-impl cmp::PartialEq for Point {
-    fn eq(&self, rhs: &Self) -> bool {
+impl<T: Into<Point> + Copy> cmp::PartialEq<T> for Point {
+    fn eq(&self, rhs: &T) -> bool {
+        let rhs: Point = (*rhs).into();
         self.x == rhs.x && self.y == rhs.y
     }
 }
