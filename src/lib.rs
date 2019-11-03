@@ -2,7 +2,10 @@ pub mod common;
 pub mod canvas;
 pub mod world;
 
-use world::World;
+#[cfg(test)]
+mod tests;
+
+use world::{SVector, World};
 use canvas::{Canvas, Color};
 
 pub struct FourierSeries {
@@ -16,7 +19,10 @@ pub struct FourierSeries {
 impl FourierSeries {
     pub fn new() -> Self {
         let canvas = Canvas::new();
-        let world = World::new();
+        let world = World::new(vec![
+                SVector::new(0.0, 1.0, 1.0),
+                SVector::new(0.0, 2.0, 1.0)
+        ]);
 
         Self {
             canvas, world,
