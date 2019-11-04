@@ -10,6 +10,7 @@ use sdl2::IntegerOrSdlError;
 use std::ffi::NulError;
 use super::common::Point;
 use sdl2::rect::Point as SdlPoint;
+use sdl2::mouse::MouseState;
 
 #[derive(Debug)]
 pub enum CanvasBuildError {
@@ -85,6 +86,10 @@ impl Canvas {
         self.event_pump.poll_iter()
     }
 
+    pub fn mouse_state(&self) -> MouseState {
+        self.event_pump.mouse_state()
+    }
+
     pub fn draw_line<T1: Into<Point>, T2: Into<Point>>(&mut self, start: T1, end: T2) -> Result<(), String> {
         self.canvas.draw_line(
             self.point_to_sdlpoint(start.into()),
@@ -109,11 +114,25 @@ impl Canvas {
         self.camera_center += point.scale(self.scale.recip());
     }
 
+    pub fn zoom(&mut self, scale: f64, center_x: i32, center_y: i32) {
+        let point_before = self.coord_to_point(center_x, center_y);
+        self.scale *= scale;
+        let point_after = self.coord_to_point(center_x, center_y);
+        self.camera_center -= point_after - point_before;
+    }
+
     fn point_to_sdlpoint(&self, point: Point) -> SdlPoint {
         let point = (point - self.camera_center).scale(self.scale);
         let (width, height) = self.canvas.output_size().unwrap();
         let new_x = (point.x() + (width as f64)/2.0).round() as i32;
         let new_y = (-point.y() + (height as f64)/2.0).round() as i32;
         SdlPoint::new(new_x, new_y)
+    }
+
+    fn coord_to_point(&self, x: i32, y: i32) -> Point {
+        let (width, height) = self.canvas.output_size().unwrap();
+        let new_x = x as f64 - (width as f64)/2.0;
+        let new_y = -y as f64 + (height as f64)/2.0;
+        Point::new(new_x, new_y).scale(self.scale.recip()) + self.camera_center
     }
 }

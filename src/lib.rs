@@ -46,6 +46,10 @@ impl FourierSeries {
                         self.canvas.move_camera_by_pixels(xrel, yrel);
                     }
                 }
+                Event::MouseWheel {y, ..} => {
+                    let mousestate = self.canvas.mouse_state();
+                    self.canvas.zoom((1.2 as f64).powi(y), mousestate.x(), mousestate.y());
+                }
                 _ => {}
             }
         }
