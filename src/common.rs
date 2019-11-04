@@ -2,17 +2,27 @@ use std::{cmp, ops};
 
 #[derive(Copy, Clone, Debug)]
 pub struct Point {
-    pub x: f64, pub y: f64,
+    x: f64, y: f64
 }
 
 impl Point {
+    pub const zero: Point = Point { x: 0.0, y: 0.0 };
+
     pub fn new(x: f64, y: f64) -> Self {
         Self { x, y }
     }
 
-    pub fn mag(&self) -> f64 {
+    pub fn mag(self) -> f64 {
         (self.x.powf(2.0) + self.y.powf(2.0)).sqrt()
     }
+
+    pub fn scale(self, scale: f64) -> Self {
+        Self::new(self.x * scale, self.y * scale)
+    }
+
+    pub fn x(self) -> f64 { self.x }
+    
+    pub fn y(self) -> f64 { self.y }
 }
 
 impl<T1: Into<f64>, T2: Into<f64>> From<(T1, T2)> for Point {
