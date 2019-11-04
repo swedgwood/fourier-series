@@ -8,6 +8,8 @@ pub use sdl2::keyboard::Keycode;
 use sdl2::video::WindowBuildError;
 use sdl2::IntegerOrSdlError;
 use std::ffi::NulError;
+use super::common::Point;
+use sdl2::rect::Point as SdlPoint;
 
 #[derive(Debug)]
 pub enum CanvasBuildError {
@@ -53,6 +55,8 @@ impl From<String> for CanvasBuildError {
 pub struct Canvas {
     canvas: sdl2::render::WindowCanvas,
     event_pump: sdl2::EventPump,
+    camera_center: Point,
+    scale: f64
 }
 
 impl Canvas {
@@ -60,22 +64,56 @@ impl Canvas {
         let sdl_context = sdl2::init().map_err(CanvasBuildError::from)?;
         let video_subsystem = sdl_context.video().map_err(CanvasBuildError::from)?;
 
-        let window = video_subsystem.window(title, width, height)
+        let canvas = video_subsystem.window(title, width, height)
             .position_centered()
+            .build()
+            .map_err(CanvasBuildError::from)?
+            .into_canvas()
             .build()
             .map_err(CanvasBuildError::from)?;
 
-        let canvas = window.into_canvas().build().map_err(CanvasBuildError::from)?;
         let event_pump = sdl_context.event_pump().map_err(CanvasBuildError::from)?;
 
-        Ok( Self { canvas, event_pump } )
+        Ok( Self { canvas, event_pump, camera_center: Point::zero, scale: 50.0 } )
+    }
+
+    pub fn poll_event(&mut self) -> Option<Event> {
+        self.event_pump.poll_event()
     }
 
     pub fn poll_events_iter(&mut self) -> EventPollIterator {
         self.event_pump.poll_iter()
     }
 
+    pub fn draw_line<T1: Into<Point>, T2: Into<Point>>(&mut self, start: T1, end: T2) -> Result<(), String> {
+        self.canvas.draw_line(
+            self.point_to_sdlpoint(start.into()),
+            self.point_to_sdlpoint(end.into())
+        )
+    }
+
+    pub fn clear(&mut self) {
+        self.canvas.clear();
+    }
+
+    pub fn set_draw_color<T: Into<Color>>(&mut self, color: T) {
+        self.canvas.set_draw_color(color);
+    }
+
     pub fn present(&mut self) {
         self.canvas.present();
+    }
+
+    pub fn move_camera_by_pixels(&mut self, x: i32, y: i32) {
+        let point = Point::new(-x as f64, y as f64);
+        self.camera_center += point.scale(self.scale.recip());
+    }
+
+    fn point_to_sdlpoint(&self, point: Point) -> SdlPoint {
+        let point = (point - self.camera_center).scale(self.scale);
+        let (width, height) = self.canvas.output_size().unwrap();
+        let new_x = (point.x() + (width as f64)/2.0).round() as i32;
+        let new_y = (-point.y() + (height as f64)/2.0).round() as i32;
+        SdlPoint::new(new_x, new_y)
     }
 }
