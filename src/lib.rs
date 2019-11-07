@@ -7,6 +7,7 @@ pub mod world;
 
 use world::{SVector, World};
 use canvas::{Canvas, Color, Event};
+use common::Point;
 
 pub struct FourierSeries {
     canvas: canvas::Canvas,
@@ -52,24 +53,28 @@ impl FourierSeries {
         }
     }
 
-    pub fn draw_svectors(&mut self) {
-
+    pub fn draw_svectors(&mut self, t: f64) {
+        let mut last_point = Point::new(0.0, 0.0);
+        self.canvas.set_draw_color(self.primary_color);
+        for point in self.world.get_state(t) {
+            self.canvas.draw_line(last_point, last_point+point).unwrap();
+            last_point += point;
+        }
     }
 
     pub fn mainloop(&mut self) {
         self.running = true;
 
-        let mut rot = 0.0;
+        let mut time = 0.0;
         while self.running {
             self.handle_events();
 
             self.canvas.set_draw_color((0, 0, 0));
             self.canvas.clear();
-            self.canvas.set_draw_color((255, 255, 255));
-            rot += 0.01;
-            rot %= 2.0*PI;
-            self.canvas.draw_line((0, 0), (3.0*rot.cos(), 3.0*rot.sin())).unwrap();
+            self.draw_svectors(time);
             self.canvas.present();
+
+            time += 0.1 / 60.0;
             ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
         };
     }
