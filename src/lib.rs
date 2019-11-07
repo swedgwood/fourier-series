@@ -5,9 +5,6 @@ pub mod common;
 pub mod canvas;
 pub mod world;
 
-#[cfg(test)]
-mod tests;
-
 use world::{SVector, World};
 use canvas::{Canvas, Color, Event};
 
@@ -53,6 +50,10 @@ impl FourierSeries {
                 _ => {}
             }
         }
+    }
+
+    pub fn draw_svectors(&mut self) {
+
     }
 
     pub fn mainloop(&mut self) {

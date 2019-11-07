@@ -1,4 +1,5 @@
 use std::f64::consts::PI;
+use std::slice::Iter;
 
 use crate::common::Point;
 
@@ -30,15 +31,30 @@ impl World {
         Self { svectors }
     }
 
-    pub fn get_state(&self, t: f64) -> Vec<Point> {
-        let mut cur_point = Point::new(0.0, 0.0);
-        let mut points: Vec<Point> = vec![cur_point];
+    pub fn get_state(&self, t: f64) -> WorldStateIter {
+        WorldStateIter::new(self.svectors.iter(), t)
+    }
+}
 
-        for svector in &self.svectors {
-            cur_point += svector.get_state(t);
-            points.push(cur_point);
+pub struct WorldStateIter<'a> {
+    svectors: Iter<'a, SVector>,
+    t: f64
+}
+
+impl<'a> WorldStateIter<'a> {
+    fn new(svectors: Iter<'a, SVector>, t: f64) -> Self {
+        Self { svectors, t }
+    }
+}
+
+impl Iterator for WorldStateIter<'_> {
+    type Item = Point;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if let Some(svector) = self.svectors.next() {
+            Some(svector.get_state(self.t))
+        } else {
+            None
         }
-
-        points
     }
 }
