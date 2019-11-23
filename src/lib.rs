@@ -1,20 +1,24 @@
-use std::time::Duration;
-use std::f64::consts::PI;
+use std::collections::VecDeque;
+use std::time::{Duration, Instant};
 
 pub mod common;
 pub mod canvas;
 pub mod world;
 
 use world::{SVector, World};
-use canvas::{Canvas, Color, Event};
+use canvas::{Canvas, Color, Event, Keycode};
 use common::Point;
 
 pub struct FourierSeries {
     canvas: canvas::Canvas,
     world: world::World,
-    primary_color: Color,
-    secondary_color: Color,
+    point_path: VecDeque<Point>,
+    svector_color: Color,
+    point_path_color: Color,
     background: Color,
+    start_time: Instant,
+    time_scale: f64,
+    frame_rate: f64,
     running: bool
 }
 
@@ -27,10 +31,13 @@ impl FourierSeries {
         ]);
 
         Self {
-            canvas, world,
-            primary_color: Color::RGB(255, 255, 255),
-            secondary_color: Color::RGB(0, 0, 255),
+            canvas, world, point_path: VecDeque::new(),
+            svector_color: Color::RGB(255, 255, 255),
+            point_path_color: Color::RGB(0, 0, 255),
             background: Color::RGB(0, 0, 0),
+            time_scale: 1.0,
+            start_time: Instant::now(),
+            frame_rate: 60.0,
             running: false
         }
     }
@@ -48,34 +55,85 @@ impl FourierSeries {
                     let mousestate = self.canvas.mouse_state();
                     self.canvas.zoom((1.2 as f64).powi(y), mousestate.x(), mousestate.y());
                 }
+                Event::KeyDown { keycode, repeat, .. } => if repeat { match keycode {
+                    _ => {}
+                }} else { match keycode {
+                    Some(Keycode::Equals) => {
+                        self.time_scale += 0.1;
+                    },
+                    Some(Keycode::Minus) => {
+                        self.time_scale -= 0.1;
+                    },
+                    Some(Keycode::R) => {
+                        self.point_path.clear();
+                        self.start_time = Instant::now();
+                    }
+                    _ => {}
+                }},
                 _ => {}
             }
         }
     }
 
-    pub fn draw_svectors(&mut self, t: f64) {
+    pub fn draw_svectors(&mut self, t: f64) -> Result<Point, String> {
+        self.canvas.set_draw_color(self.svector_color);
+
         let mut last_point = Point::new(0.0, 0.0);
-        self.canvas.set_draw_color(self.primary_color);
         for point in self.world.get_state(t) {
-            self.canvas.draw_line(last_point, last_point+point).unwrap();
+            self.canvas.draw_line(last_point, last_point+point)?;
             last_point += point;
+        }
+        Ok(last_point)
+    }
+
+    pub fn add_draw_point(&mut self, point: Point) {
+        self.point_path.push_back(point);
+
+        if self.point_path.len() > 1000 {
+            self.point_path.pop_front();
+        }
+    }
+
+    pub fn draw_point_path(&mut self) -> Result<(), String> {
+        self.canvas.set_draw_color(self.point_path_color);
+
+        let mut points = self.point_path.iter();
+        if let Some(start_point) = points.next() {
+            let mut last_point = *start_point;
+            for point in points {
+                self.canvas.draw_line(last_point, *point)?;
+                last_point = *point;
+            }
+            Ok(())
+        } else {
+            Ok(())
         }
     }
 
     pub fn mainloop(&mut self) {
         self.running = true;
 
-        let mut time = 0.0;
-        while self.running {
-            self.handle_events();
+        self.start_time = Instant::now();
 
-            self.canvas.set_draw_color((0, 0, 0));
+        while self.running {
+            let now = Instant::now();
+            self.handle_events();
+            let time = self.start_time.elapsed().as_secs_f64() * self.time_scale;
+
+            self.canvas.set_draw_color(self.background);
             self.canvas.clear();
-            self.draw_svectors(time);
+
+            let tail = self.draw_svectors(time).unwrap();
+            self.add_draw_point(tail);
+            self.draw_point_path().unwrap();
             self.canvas.present();
 
-            time += 0.1 / 60.0;
-            ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
+            let framedelay = Duration::new(0, 1_000_000_000u32 / self.frame_rate as u32);
+            let elapsed = now.elapsed();
+
+            if elapsed < framedelay {
+                ::std::thread::sleep(framedelay - elapsed);
+            }
         };
     }
 }
