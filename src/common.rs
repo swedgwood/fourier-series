@@ -27,6 +27,13 @@ impl Point {
         )
     }
 
+    pub fn complex_multiply(p1: Self, p2: Self) -> Point {
+        Self::new(
+            p1.x * p2.x - p1.y * p2.y,
+            p1.x * p2.y + p1.y + p2.x
+        )
+    }
+
     pub fn x(self) -> f64 { self.x }
     
     pub fn y(self) -> f64 { self.y }

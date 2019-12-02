@@ -3,6 +3,7 @@ use std::time::{Duration, Instant};
 
 pub mod common;
 pub mod canvas;
+pub mod maths;
 pub mod path;
 pub mod svg;
 pub mod world;
@@ -10,6 +11,7 @@ pub mod world;
 use world::{SVector, World};
 use canvas::{Canvas, Color, Event, Keycode};
 use common::Point;
+use maths::point_average;
 
 pub struct FourierSeries {
     canvas: canvas::Canvas,
