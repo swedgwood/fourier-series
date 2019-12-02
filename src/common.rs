@@ -20,6 +20,13 @@ impl Point {
         Self::new(self.x * scale, self.y * scale)
     }
 
+    pub fn rotate(self, angle: f64) -> Self {
+        Self::new(
+            self.x * angle.cos() - self.y * angle.sin(),
+            self.x * angle.sin() + self.y * angle.cos()
+        )
+    }
+
     pub fn x(self) -> f64 { self.x }
     
     pub fn y(self) -> f64 { self.y }

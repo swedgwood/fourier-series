@@ -3,6 +3,8 @@ use std::time::{Duration, Instant};
 
 pub mod common;
 pub mod canvas;
+pub mod path;
+pub mod svg;
 pub mod world;
 
 use world::{SVector, World};
@@ -40,6 +42,46 @@ impl FourierSeries {
             frame_rate: 60.0,
             running: false
         }
+    }
+
+    pub fn get_background(&self) -> Color {
+        self.background
+    }
+
+    pub fn get_start_time(&self) -> Instant {
+        self.start_time
+    }
+
+    pub fn reset_start_time(&mut self) {
+        self.start_time = Instant::now();
+    } 
+
+    pub fn get_time_scale(&self) -> f64 {
+        self.time_scale
+    }
+
+    pub fn get_frame_rate(&self) -> f64 {
+        self.frame_rate
+    }
+
+    pub fn set_running(&mut self, value: bool) {
+        self.running = value;
+    }
+
+    pub fn get_running(&self) -> bool {
+        self.running
+    }
+    
+    pub fn present_canvas(&mut self) {
+        self.canvas.present();
+    }
+
+    pub fn clear_canvas(&mut self) {
+        self.canvas.clear();
+    }
+
+    pub fn set_canvas_draw_color<T: Into<Color>>(&mut self, color: T) {
+        self.canvas.set_draw_color(color);
     }
 
     pub fn handle_events(&mut self) {
