@@ -1,17 +1,21 @@
 use std::collections::VecDeque;
+use std::f64::consts::PI;
+use std::iter::FromIterator;
 use std::time::{Duration, Instant};
 
 pub mod common;
 pub mod canvas;
 pub mod maths;
 pub mod path;
-pub mod svg;
+pub mod svgpath;
 pub mod world;
 
 use world::{SVector, World};
 use canvas::{Canvas, Color, Event, Keycode};
 use common::Point;
 use maths::point_average;
+use path::ParametricPath;
+use svgpath::SVGPath;
 
 pub struct FourierSeries {
     canvas: canvas::Canvas,
@@ -23,25 +27,54 @@ pub struct FourierSeries {
     start_time: Instant,
     time_scale: f64,
     frame_rate: f64,
+    camera_lock: bool,
     running: bool
 }
 
 impl FourierSeries {
     pub fn new() -> Self {
         let canvas = Canvas::new("Test Window", 800, 600).unwrap();
-        let world = World::new(vec![
-                SVector::new(0.0, 1.0, 1.0),
-                SVector::new(0.0, 2.0, 1.0)
-        ]);
+        let p = SVGPath::new("example2.svg").unwrap();
+
+        let mut svectors: Vec<SVector> = Vec::new();
+
+        for freq in 1..100 {
+            let points = (0..10000)
+                .map(|x| x as f64/10000.0)
+                .map(|x| Point::complex_mult(p.get_point(x), Point::from_ei(-freq as f64 * 2.0 * PI * x)));
+
+            let point_avg = point_average(points);
+
+            svectors.push(SVector::new(
+                point_avg.angle(),
+                freq as f64,
+                point_avg.mag()
+            ));
+
+            let points = (0..10000)
+                .map(|x| x as f64/10000.0)
+                .map(|x| Point::complex_mult(p.get_point(x), Point::from_ei(freq as f64 * 2.0 * PI * x)));
+
+            let point_avg = point_average(points);
+
+            svectors.push(SVector::new(
+                point_avg.angle(),
+                -freq as f64,
+                point_avg.mag()
+            ));
+        }
+        
+        let world = World::new(svectors);
 
         Self {
             canvas, world, point_path: VecDeque::new(),
             svector_color: Color::RGB(255, 255, 255),
             point_path_color: Color::RGB(0, 0, 255),
             background: Color::RGB(0, 0, 0),
-            time_scale: 1.0,
+            time_scale: 0.1,
             start_time: Instant::now(),
             frame_rate: 60.0,
+            camera_lock: false,
             running: false
         }
     }
@@ -91,7 +124,7 @@ impl FourierSeries {
             match event {
                 Event::Quit {..} => { self.running = false; }
                 Event::MouseMotion {mousestate, xrel, yrel, ..} => {
-                    if mousestate.left() {
+                    if mousestate.left() && !self.camera_lock {
                         self.canvas.move_camera_by_pixels(xrel, yrel);
                     }
                 }
@@ -103,15 +136,18 @@ impl FourierSeries {
                     _ => {}
                 }} else { match keycode {
                     Some(Keycode::Equals) => {
-                        self.time_scale += 0.1;
+                        self.time_scale *= 1.2;
                     },
                     Some(Keycode::Minus) => {
-                        self.time_scale -= 0.1;
+                        self.time_scale /= 1.2;
                     },
                     Some(Keycode::R) => {
                         self.point_path.clear();
                         self.start_time = Instant::now();
-                    }
+                    },
+                    Some(Keycode::L) => {
+                        self.camera_lock = !self.camera_lock;
+                    },
                     _ => {}
                 }},
                 _ => {}
@@ -163,11 +199,15 @@ impl FourierSeries {
             let now = Instant::now();
             self.handle_events();
             let time = self.start_time.elapsed().as_secs_f64() * self.time_scale;
+            println!("{}", time);
 
             self.canvas.set_draw_color(self.background);
             self.canvas.clear();
 
             let tail = self.draw_svectors(time).unwrap();
+            if self.camera_lock {
+                self.canvas.set_camera_pos(tail);
+            }
             self.add_draw_point(tail);
             self.draw_point_path().unwrap();
             self.canvas.present();
