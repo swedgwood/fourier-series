@@ -34,7 +34,7 @@ pub struct FourierSeries {
 impl FourierSeries {
     pub fn new() -> Self {
         let canvas = Canvas::new("Test Window", 800, 600).unwrap();
-        let p = SVGPath::new("example2.svg").unwrap();
+        let p = SVGPath::new("example.svg").unwrap();
 
         let mut svectors: Vec<SVector> = Vec::new();
 
