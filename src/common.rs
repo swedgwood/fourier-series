@@ -2,7 +2,7 @@ use std::{cmp, ops};
 
 #[derive(Copy, Clone, Debug)]
 pub struct Point {
-    x: f64, y: f64
+    pub x: f64, pub y: f64
 }
 
 impl Point {
@@ -12,8 +12,16 @@ impl Point {
         Self { x, y }
     }
 
+    pub fn from_ei(angle: f64) -> Self {
+        Point::new(1.0, 0.0).rotate(angle)
+    }
+
     pub fn mag(self) -> f64 {
         (self.x.powf(2.0) + self.y.powf(2.0)).sqrt()
+    }
+
+    pub fn angle(self) -> f64 {
+        self.y.atan2(self.x)
     }
 
     pub fn scale(self, scale: f64) -> Self {
@@ -24,6 +32,13 @@ impl Point {
         Self::new(
             self.x * angle.cos() - self.y * angle.sin(),
             self.x * angle.sin() + self.y * angle.cos()
+        )
+    }
+
+    pub fn complex_mult(p1: Self, p2: Self) -> Self {
+        Self::new(
+            p1.x * p2.x - p1.y * p2.y,
+            p1.x * p2.y + p1.y * p2.x
         )
     }
 

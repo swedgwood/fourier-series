@@ -102,9 +102,9 @@ impl Line {
 
         while numbers.peek().is_some() {
             let start = last_end;
-            let mut end = Point::new(*(numbers.next().unwrap()) as f64, 0.0);
+            let mut end = Point::new(*(numbers.next().unwrap()) as f64, start.y);
             if pos == &Position::Relative {
-                end += start
+                end.x += start.x
             }
             last_end = end;
             return_vec.push(Box::new(Self {start, end}));
@@ -124,9 +124,9 @@ impl Line {
 
         while numbers.peek().is_some() {
             let start = last_end;
-            let mut end = Point::new(0.0, *(numbers.next().unwrap()) as f64);
+            let mut end = Point::new(start.x, *(numbers.next().unwrap()) as f64);
             if pos == &Position::Relative {
-                end += start
+                end.y += start.y
             }
             last_end = end;
             return_vec.push(Box::new(Self {start, end}));

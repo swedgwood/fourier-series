@@ -75,7 +75,7 @@ impl Canvas {
 
         let event_pump = sdl_context.event_pump().map_err(CanvasBuildError::from)?;
 
-        Ok( Self { canvas, event_pump, camera_center: Point::ZERO, scale: 50.0 } )
+        Ok( Self { canvas, event_pump, camera_center: Point::ZERO, scale: 0.03 } )
     }
 
     pub fn poll_event(&mut self) -> Option<Event> {
@@ -107,6 +107,10 @@ impl Canvas {
 
     pub fn present(&mut self) {
         self.canvas.present();
+    }
+
+    pub fn set_camera_pos(&mut self, p: Point) {
+        self.camera_center = p;
     }
 
     pub fn move_camera_by_pixels(&mut self, x: i32, y: i32) {
