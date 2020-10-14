@@ -1,4 +1,4 @@
-# Fourier series
+# Complex Fourier Series Visualisation
 
 The goal of this project was to create a visualisation similar to that shown in [this video](https://www.youtube.com/watch?v=-qgreAUpPwM&vl=en), I was inspired by [this amazing video explaining all the maths](https://www.youtube.com/watch?v=r6sGWTCMz2k&vl=en) behind this visualisation.
 
