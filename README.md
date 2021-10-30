@@ -38,3 +38,4 @@ If you are using WSL, you may want to use an X server. I suggest [this stackover
 - Resizable window
 - Graphics acceleration? (would probably require a rewrite)
 - Saving to gif/mp4
+- Support SVGs with multiple paths
